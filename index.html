@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Generador de Sudokus Imprimibles</title>
+<link rel="stylesheet" href="css/styles.css" />
+<link rel="stylesheet" href="css/print.css" media="print" />
+<noscript><style>body{font-family:system-ui,Arial} .nojs{padding:1rem;margin:1rem;border:1px solid #c00;background:#fee;color:#900}</style></noscript>
+</head>
+<body>
+<header class="app-header" role="banner">
+<h1>Generador de Sudokus Imprimibles</h1>
+<p class="subtitle">Sudokus únicos con solución • Listos para imprimir</p>
+</header>
+
+
+<main class="container" role="main">
+<section class="controls" aria-label="Controles de generación">
+<div class="control-group">
+<label for="difficulty">Dificultad</label>
+<select id="difficulty" aria-label="Seleccionar dificultad">
+<option value="easy">Fácil</option>
+<option value="medium" selected>Media</option>
+<option value="hard">Difícil</option>
+</select>
+</div>
+<div class="control-group">
+<label for="count">Cantidad</label>
+<input id="count" type="number" min="1" max="100" step="1" value="12" aria-label="Cantidad de sudokus a generar" />
+</div>
+<div class="control-group">
+<label for="seed">Seed (opcional)</label>
+<input id="seed" type="text" placeholder="aleatoria" aria-label="Semilla opcional para reproducibilidad" />
+</div>
+<div class="buttons">
+<button id="generateBtn" class="btn primary" title="Atajo: g">Generar</button>
+<button id="toggleSolutionsBtn" class="btn" title="Atajo: s">Mostrar soluciones</button>
+<button id="printBtn" class="btn" title="Atajo: p">Imprimir</button>
+</div>
+<p class="hint">Atajos: <kbd>g</kbd> generar • <kbd>p</kbd> imprimir • <kbd>s</kbd> ver/ocultar soluciones</p>
+</section>
+
+
+<section id="status" class="status" aria-live="polite"></section>
+<section id="output" class="output" aria-live="polite"></section>
+
+
+<noscript>
+<div class="nojs">Necesitas JavaScript habilitado para generar los sudokus.</div>
+</noscript>
+</main>
+
+
+<footer class="app-footer" role="contentinfo">
+<small>100% estático • GitHub Pages listo • © Tu marca</small>
+</footer>
+
+
+<!-- Sólo UI; la lógica pesada corre en el worker -->
+<script src="js/sudoku-ui.js"></script>
+</body>
+</html>

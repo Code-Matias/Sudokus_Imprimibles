@@ -1,0 +1,83 @@
+/* print.css — Impresión (PDF/papel) */
+@media print {
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  html, body{
+    background:#fff !important;
+    color:#000 !important;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11pt;
+  }
+
+  /* Ocultar UI de pantalla */
+  header, nav, footer,
+  .controls, .shortcuts, #status,
+  .puzzle-grid, .card,
+  button, select, input { display:none !important; }
+
+  /* Mostrar únicamente estas secciones */
+  .print-only{ display:block !important; }
+
+  .print-section{
+    page-break-after: always;
+    padding: 10mm 8mm 10mm;
+  }
+  .print-section:last-of-type{ page-break-after: auto; }
+
+  .print-title{
+    text-align:center;
+    font-weight: 800;
+    font-size: 17pt;
+    letter-spacing: .2px;
+    margin: 0 0 9mm 0;
+  }
+
+  /* Grilla de tarjetas para impresión
+     — 2 por fila (ideal A4/Letter). Para 3 por fila, cambia a repeat(3, 1fr) y ajusta tablero a 62mm
+  */
+  .print-grid{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10mm 10mm;
+  }
+  .print-card{ break-inside: avoid; }
+
+  .print-card-title{
+    font-size: 10.5pt;
+    font-weight: 800;
+    margin: 0 0 2.5mm 2mm;
+  }
+
+  /* Tablero tamaño fijo: cuadrado real (sin aspect-ratio) */
+  .board{
+    width: 90mm;
+    height: 90mm;
+    margin: 0 auto;
+    background: #fff;
+    border: 1pt solid #000;
+    display:grid;
+    grid-template-columns: repeat(9, 1fr);
+  }
+  .cell{
+    border: 0.5pt solid #000;
+    display:flex; align-items:center; justify-content:center;
+    font: 12pt/1.05 "Helvetica Neue", Arial, sans-serif;
+    color:#000;
+  }
+  .cell.blank{ color: transparent; }
+
+  /* Líneas 3x3 gruesas */
+  .cell:nth-child(3n+1) { border-left-width: 1.5pt; }
+  .cell:nth-child(9n)   { border-right-width: 1.5pt; }
+  .board > .cell:nth-child(n+1):nth-child(-n+9)  { border-top-width: 1.5pt; }
+  .board > .cell:nth-child(n+73):nth-child(-n+81){ border-bottom-width: 1.5pt; }
+  .board > .cell:nth-child(27n+1),
+  .board > .cell:nth-child(27n+2),
+  .board > .cell:nth-child(27n+3),
+  .board > .cell:nth-child(27n+4),
+  .board > .cell:nth-child(27n+5),
+  .board > .cell:nth-child(27n+6),
+  .board > .cell:nth-child(27n+7),
+  .board > .cell:nth-child(27n+8),
+  .board > .cell:nth-child(27n+9){ border-top-width: 1.5pt; }
+}
