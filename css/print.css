@@ -1,12 +1,14 @@
-/* print.css — Impresión (PDF/papel) */
+/* print.css — Edición "periódico" (monocromo, sobrio, legible) */
 @media print {
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
   html, body{
     background:#fff !important;
     color:#000 !important;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 11pt;
+    /* Serif clásica de diario */
+    font-family: "Georgia", "Times New Roman", Times, serif;
+    font-size: 10.5pt;
+    line-height: 1.35;
   }
 
   /* Ocultar UI de pantalla */
@@ -15,8 +17,21 @@
   .puzzle-grid, .card,
   button, select, input { display:none !important; }
 
-  /* Mostrar únicamente estas secciones */
+  /* Mostrar solo secciones de impresión */
   .print-only{ display:block !important; }
+
+  /* Cabecera tipo periódico */
+  .print-title{
+    text-align:center;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-weight: 700;
+    font-size: 16pt;
+    margin: 0 0 6mm 0;
+    padding: 2mm 0 3mm;
+    border-top: 1pt solid #111;
+    border-bottom: 1pt solid #111;
+  }
 
   .print-section{
     page-break-after: always;
@@ -24,53 +39,54 @@
   }
   .print-section:last-of-type{ page-break-after: auto; }
 
-  .print-title{
-    text-align:center;
-    font-weight: 800;
-    font-size: 17pt;
-    letter-spacing: .2px;
-    margin: 0 0 9mm 0;
-  }
-
-  /* Grilla de tarjetas para impresión
-     — 2 por fila (ideal A4/Letter). Para 3 por fila, cambia a repeat(3, 1fr) y ajusta tablero a 62mm
-  */
+  /* Rejilla "suplemento": 3 por fila (compacto y uniforme) */
   .print-grid{
     display:grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10mm 10mm;
+    grid-template-columns: repeat(3, 1fr);   /* ← pon repeat(2,1fr) si quieres 2 por fila */
+    gap: 8mm 8mm;
   }
-  .print-card{ break-inside: avoid; }
 
+  .print-card{
+    break-inside: avoid;
+  }
+
+  /* Rótulo pequeño alineado a la izquierda (# y huecos) */
   .print-card-title{
-    font-size: 10.5pt;
-    font-weight: 800;
-    margin: 0 0 2.5mm 2mm;
+    font-size: 9pt;
+    font-variant-caps: small-caps;
+    letter-spacing: .03em;
+    margin: 0 0 1.5mm .5mm;
+    color: #111;
   }
 
-  /* Tablero tamaño fijo: cuadrado real (sin aspect-ratio) */
+  /* Tablero sobrio: líneas finas (celda) y más gruesas en 3x3, con gris periódico */
   .board{
-    width: 90mm;
-    height: 90mm;
+    /* Tamaño fijo pensado para 3 por fila */
+    width: 62mm;              /* cambia a 90mm si usas 2 por fila */
+    height: 62mm;             /* idem */
     margin: 0 auto;
     background: #fff;
-    border: 1pt solid #000;
+    border: 0.8pt solid #222; /* marco exterior ligeramente más oscuro */
     display:grid;
     grid-template-columns: repeat(9, 1fr);
   }
   .cell{
-    border: 0.5pt solid #000;
+    border: 0.35pt solid #888;   /* gris prensa para el fino */
     display:flex; align-items:center; justify-content:center;
-    font: 12pt/1.05 "Helvetica Neue", Arial, sans-serif;
-    color:#000;
+    font: 12pt/1 "Georgia", "Times New Roman", Times, serif;
+    color:#000;                  /* números negros, sin rellenos */
   }
-  .cell.blank{ color: transparent; }
+  .cell.blank{ color: transparent; }  /* huecos realmente vacíos */
 
-  /* Líneas 3x3 gruesas */
-  .cell:nth-child(3n+1) { border-left-width: 1.5pt; }
-  .cell:nth-child(9n)   { border-right-width: 1.5pt; }
-  .board > .cell:nth-child(n+1):nth-child(-n+9)  { border-top-width: 1.5pt; }
-  .board > .cell:nth-child(n+73):nth-child(-n+81){ border-bottom-width: 1.5pt; }
+  /* Líneas 3x3 más marcadas (gris oscuro, no negro puro) */
+  .cell:nth-child(3n+1) { border-left-width: 1pt; border-left-color:#333; }
+  .cell:nth-child(9n)   { border-right-width: 1pt; border-right-color:#333; }
+
+  /* primera y última fila del tablero */
+  .board > .cell:nth-child(n+1):nth-child(-n+9)     { border-top-width: 1pt; border-top-color:#333; }
+  .board > .cell:nth-child(n+73):nth-child(-n+81)   { border-bottom-width: 1pt; border-bottom-color:#333; }
+
+  /* cada 3 filas, una regla más gruesa simulando caja de bloque */
   .board > .cell:nth-child(27n+1),
   .board > .cell:nth-child(27n+2),
   .board > .cell:nth-child(27n+3),
@@ -79,5 +95,10 @@
   .board > .cell:nth-child(27n+6),
   .board > .cell:nth-child(27n+7),
   .board > .cell:nth-child(27n+8),
-  .board > .cell:nth-child(27n+9){ border-top-width: 1.5pt; }
+  .board > .cell:nth-child(27n+9){
+    border-top-width: 1pt; border-top-color:#333;
+  }
+
+  /* Margen mínimo bajo cada tablero para respiración */
+  .print-card .board{ margin-bottom: 1mm; }
 }
