@@ -1,11 +1,14 @@
-/* print.css — Edición "periódico" (monocromo, sobrio, legible) */
+/* print.css — Edición "periódico" (monocromo, sobrio, legible) — FIX */
 @media print {
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  /* ===== Variables de impresión ===== */
+  /* Cambia --board-size a 90mm si quieres 2 por fila */
+  .print-only { --board-size: 62mm; } /* 62mm => 3 por fila, 90mm => 2 por fila */
 
   html, body{
     background:#fff !important;
     color:#000 !important;
-    /* Serif clásica de diario */
     font-family: "Georgia", "Times New Roman", Times, serif;
     font-size: 10.5pt;
     line-height: 1.35;
@@ -17,7 +20,7 @@
   .puzzle-grid, .card,
   button, select, input { display:none !important; }
 
-  /* Mostrar solo secciones de impresión */
+  /* Mostrar sólo secciones de impresión */
   .print-only{ display:block !important; }
 
   /* Cabecera tipo periódico */
@@ -39,18 +42,16 @@
   }
   .print-section:last-of-type{ page-break-after: auto; }
 
-  /* Rejilla "suplemento": 3 por fila (compacto y uniforme) */
+  /* Rejilla: por defecto 3 por fila; cambia a repeat(2,1fr) si subes --board-size a 90mm */
   .print-grid{
     display:grid;
-    grid-template-columns: repeat(3, 1fr);   /* ← pon repeat(2,1fr) si quieres 2 por fila */
+    grid-template-columns: repeat(3, 1fr);
     gap: 8mm 8mm;
   }
 
-  .print-card{
-    break-inside: avoid;
-  }
+  .print-card{ break-inside: avoid; }
 
-  /* Rótulo pequeño alineado a la izquierda (# y huecos) */
+  /* Rótulo pequeño */
   .print-card-title{
     font-size: 9pt;
     font-variant-caps: small-caps;
@@ -59,46 +60,71 @@
     color: #111;
   }
 
-  /* Tablero sobrio: líneas finas (celda) y más gruesas en 3x3, con gris periódico */
-  .board{
-    /* Tamaño fijo pensado para 3 por fila */
-    width: 62mm;              /* cambia a 90mm si usas 2 por fila */
-    height: 62mm;             /* idem */
+  /* ===== Tablero sólo dentro de .print-only ===== */
+  .print-only .board{
+    width: var(--board-size);
+    aspect-ratio: 1 / 1;               /* cuadrado exacto */
     margin: 0 auto;
     background: #fff;
-    border: 0.8pt solid #222; /* marco exterior ligeramente más oscuro */
-    display:grid;
+    display: grid;
     grid-template-columns: repeat(9, 1fr);
+    grid-template-rows: repeat(9, 1fr); /* 9 filas iguales */
+
+    /* Marco exterior único */
+    outline: 1pt solid #333;
+    outline-offset: 0;
+
+    /* Recorta desbordes por redondeo */
+    overflow: hidden;
+    box-sizing: border-box;
   }
-  .cell{
-    border: 0.35pt solid #888;   /* gris prensa para el fino */
-    display:flex; align-items:center; justify-content:center;
+
+  .print-only .cell{
+    display:flex;
+    align-items:center;
+    justify-content:center;
     font: 12pt/1 "Georgia", "Times New Roman", Times, serif;
-    color:#000;                  /* números negros, sin rellenos */
-  }
-  .cell.blank{ color: transparent; }  /* huecos realmente vacíos */
-
-  /* Líneas 3x3 más marcadas (gris oscuro, no negro puro) */
-  .cell:nth-child(3n+1) { border-left-width: 1pt; border-left-color:#333; }
-  .cell:nth-child(9n)   { border-right-width: 1pt; border-right-color:#333; }
-
-  /* primera y última fila del tablero */
-  .board > .cell:nth-child(n+1):nth-child(-n+9)     { border-top-width: 1pt; border-top-color:#333; }
-  .board > .cell:nth-child(n+73):nth-child(-n+81)   { border-bottom-width: 1pt; border-bottom-color:#333; }
-
-  /* cada 3 filas, una regla más gruesa simulando caja de bloque */
-  .board > .cell:nth-child(27n+1),
-  .board > .cell:nth-child(27n+2),
-  .board > .cell:nth-child(27n+3),
-  .board > .cell:nth-child(27n+4),
-  .board > .cell:nth-child(27n+5),
-  .board > .cell:nth-child(27n+6),
-  .board > .cell:nth-child(27n+7),
-  .board > .cell:nth-child(27n+8),
-  .board > .cell:nth-child(27n+9){
-    border-top-width: 1pt; border-top-color:#333;
+    color:#000;
+    border: none;
+    box-sizing: border-box;
   }
 
-  /* Margen mínimo bajo cada tablero para respiración */
+  /* Líneas finas (sólo abajo y derecha) */
+  .print-only .cell{
+    border-right: 0.35pt solid #888;
+    border-bottom: 0.35pt solid #888;
+  }
+
+  /* Última columna y última fila sin bordes finos extra */
+  .print-only .cell:nth-child(9n){ border-right: none; }
+  .print-only .cell:nth-child(n+73){ border-bottom: none; }
+
+  /* Líneas gruesas de bloques 3x3 (verticales) */
+  .print-only .cell:nth-child(3n){
+    border-right: 1pt solid #333;
+  }
+  .print-only .cell:nth-child(9n){
+    border-right: none; /* última columna limpia (el marco lo pone el outline) */
+  }
+
+  /* Líneas gruesas de bloques 3x3 (horizontales) */
+  .print-only .cell:nth-child(n+19):nth-child(-n+27),
+  .print-only .cell:nth-child(n+46):nth-child(-n+54),
+  .print-only .cell:nth-child(n+73):nth-child(-n+81){
+    border-bottom: 1pt solid #333;
+  }
+
+  /* Huecos vacíos */
+  .print-only .cell.blank{ color: transparent; }
+
+  /* Margen mínimo bajo cada tablero */
   .print-card .board{ margin-bottom: 1mm; }
 }
+
+/* ===== Variante 2 por fila (opcional) =====
+   Activa descomentando este bloque:
+@media print {
+  .print-only { --board-size: 90mm; }
+  .print-grid{ grid-template-columns: repeat(2, 1fr); }
+}
+*/
