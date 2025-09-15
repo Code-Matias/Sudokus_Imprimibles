@@ -15,11 +15,11 @@
     dark.disabled  = !isDark;
     light.disabled =  isDark;
 
-    // Agregar una clase en <html> para poder “pintar” cosas según el tema
+    // Clase en <html> para estilos dependientes del tema
     root.classList.toggle('dark',  isDark);
     root.classList.toggle('light', !isDark);
 
-    // Guardar preferencia
+    // Guardar preferencia del usuario
     try{ localStorage.setItem(KEY, mode); }catch(_){}
 
     // Icono + accesibilidad
@@ -44,4 +44,14 @@
     var next = (dark.disabled ? 'dark' : 'light');
     apply(next);
   });
+
+  // Acompañar cambios del sistema si el usuario NO forzó un tema
+  try{
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    // addEventListener es soportado moderno; en Safari viejo existe mq.addListener
+    (mq.addEventListener || mq.addListener).call(mq, 'change', function(e){
+      var stored = null; try{ stored = localStorage.getItem(KEY); }catch(_){}
+      if (!stored) apply(e.matches ? 'dark' : 'light');
+    });
+  }catch(_){}
 })();

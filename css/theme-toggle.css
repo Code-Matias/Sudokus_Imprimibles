@@ -1,7 +1,12 @@
-/* Botón de tema: redondo, táctil, con fondo invertido según el tema */
+/* Botón de tema: redondo, táctil y con fondo invertido según el tema.
+   - En MODO CLARO (por defecto): fondo oscuro + luna 🌙
+   - En MODO OSCURO: fondo claro + sol ☀️
+*/
+
 .theme-btn{
   width: 44px;
   height: 44px;
+  min-width: 44px; /* accesibilidad en móvil */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -11,7 +16,9 @@
   cursor: pointer;
   transition: transform .05s ease, background .2s ease, border-color .2s ease, color .2s ease;
   font-size: 1.4rem; /* tamaño del emoji */
-  /* ---- MODO CLARO por defecto (fondo oscuro, icono claro) ---- */
+  font-family: system-ui, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+
+  /* ---- MODO CLARO (fondo oscuro) ---- */
   background: #0f172a;          /* gris muy oscuro */
   color: #ffffff;
   border: 1px solid #0f172a;
@@ -20,23 +27,34 @@
 
 .theme-btn .icon{
   display: inline-block;
-  transform: translateY(-1px); /* ajuste óptico */
+  transform: translateY(-1px); /* ajuste óptico del emoji */
 }
 
 .theme-btn:hover{ filter: brightness(1.05); }
 .theme-btn:active{ transform: translateY(1px); }
 
-/* Foco visible (además del de Bootstrap) */
+/* Foco visible: color acorde al tema */
 .theme-btn:focus-visible{
-  outline: 3px solid rgba(13,110,253,.35);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(13,110,253,.35);
 }
 
-/* ---- MODO OSCURO (fondo claro, icono oscuro) ----
-   La clase .dark se setea en <html> desde theme.js */
+/* ---- MODO OSCURO (fondo claro) ----
+   La clase .dark se setea en <html> desde js/theme.js */
 html.dark .theme-btn{
   background: #f8fafc;          /* casi blanco */
   color: #0f172a;
   border: 1px solid #e2e8f0;
   box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
 }
+html.dark .theme-btn:focus-visible{
+  box-shadow: 0 0 0 3px rgba(96,165,250,.35);
+}
+
+/* --- (Opcional) Si alguna vez dejas .btn en el markup, blinda tu estilo ---
+.theme-btn.btn {
+  border-color: inherit !important;
+  background: inherit !important;
+  color: inherit !important;
+}
+*/
