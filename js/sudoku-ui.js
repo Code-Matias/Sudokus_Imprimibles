@@ -1,11 +1,11 @@
-// /js/sudoku-ui.js
-// UI: genera lotes, alterna soluciones, imprime. Crea secciones de impresión separadas:
-//  - "Problemas" (tableros con huecos)
-//  - "Soluciones" (todas al final)
-// Requiere que el worker esté accesible en js/generator-worker.js
+// js/sudoku-ui.js
+// UI de la app: genera sudokus, muestra resultados en pantalla y arma secciones de impresión.
+// - Botón "Generar" con spinner y estados claros.
+// - Impresión: tableros en SVG (líneas perfectas) dentro de .print-only.
+// - Sin dependencias externas. Worker clásico: js/generator-worker.js
 
 (function () {
-  const WORKER_VER = 'v10'; // Debe coincidir con generator-worker.js
+  const WORKER_VER = 'v10'; // asegurate de versionarlo cuando cambies el worker
   let WORKER_URL;
 
   function safeWorkerURL() {
@@ -27,7 +27,7 @@
   ready(() => {
     WORKER_URL = safeWorkerURL();
 
-    // ---------- DOM ----------
+    // ---------- Captura de elementos ----------
     const els = {
       output: document.getElementById('output'),
       status: document.getElementById('status'),
@@ -40,7 +40,8 @@
       main: document.querySelector('main') || document.body
     };
 
-    ['generateBtn','printBtn','toggleSolutionsBtn'].forEach(k=>{
+    // Asegurar type="button"
+    ['generateBtn', 'printBtn', 'toggleSolutionsBtn'].forEach(k => {
       if (els[k]) els[k].setAttribute('type', 'button');
     });
 
@@ -51,7 +52,7 @@
     let gridEl = null;
     const results = []; // {puzzle, solution, index}
 
-    // ---------- Secciones solo impresión ----------
+    // ---------- Secciones de impresión (siempre en el DOM, ocultas en pantalla por CSS) ----------
     const printProblemsSection = document.createElement('section');
     printProblemsSection.className = 'print-only print-section print-problems';
     const problemsHeading = document.createElement('h2');
@@ -75,14 +76,52 @@
     (els.main || document.body).appendChild(printProblemsSection);
     (els.main || document.body).appendChild(printSolutionsSection);
 
-    // ---------- Utilidades ----------
-    function setStatus(t){ if (els.status) els.status.textContent = t || ''; }
-    function parseCount(){
+    // ---------- Helpers UI ----------
+    function setStatus(t) {
+      if (els.status) els.status.textContent = t || '';
+    }
+
+    function parseCount() {
       const n = +(els.count && els.count.value);
       return Number.isFinite(n) && n > 0 ? Math.min(n, 100) : 1;
     }
 
-    // Tablero HTML (pantalla)
+    // Botón Generar: asegurar spans (label + spinner) para togglear estado
+    function initGenerateButtonUI() {
+      if (!els.generateBtn) return;
+      if (!els.generateBtn.querySelector('.label')) {
+        const lab = document.createElement('span');
+        lab.className = 'label';
+        lab.textContent = 'Generar';
+        els.generateBtn.appendChild(lab);
+      }
+      if (!els.generateBtn.querySelector('.spinner-border')) {
+        const sp = document.createElement('span');
+        sp.className = 'spinner-border spinner-border-sm d-none';
+        sp.setAttribute('role', 'status');
+        sp.setAttribute('aria-hidden', 'true');
+        els.generateBtn.appendChild(sp);
+      }
+    }
+
+    function setGenerating(isOn, textWhile = 'Generando…') {
+      if (!els.generateBtn) return;
+      const label = els.generateBtn.querySelector('.label');
+      const spin = els.generateBtn.querySelector('.spinner-border');
+      els.generateBtn.disabled = !!isOn;
+      if (spin) spin.classList.toggle('d-none', !isOn);
+      if (label) label.textContent = isOn ? textWhile : 'Generar';
+    }
+
+    function setPrintEnabled(canPrint) {
+      if (els.printBtn) els.printBtn.disabled = !canPrint;
+    }
+
+    initGenerateButtonUI();
+    setPrintEnabled(false);
+
+    // ---------- Render de tableros ----------
+    // Pantalla: con <div> y bordes simples
     function renderBoard(grid, { withBlanks = true } = {}) {
       const board = document.createElement('div');
       board.className = 'board';
@@ -96,9 +135,9 @@
       return board;
     }
 
-    // Tablero SVG (impresión): líneas perfectas y escalado 100%
-    function renderBoardSVG(grid){
-      const size = 270;              // unidades internas; se escala con CSS
+    // Impresión: SVG (líneas perfectas)
+    function renderBoardSVG(grid) {
+      const size = 270; // unidades internas del SVG (se escalan al 100%)
       const step = size / 9;
       const NS = 'http://www.w3.org/2000/svg';
 
@@ -109,12 +148,11 @@
       svg.style.height = '100%';
       svg.setAttribute('aria-hidden', 'true');
 
-      // grosores
       const THIN = 0.8;
       const THICK = 1.6;
       const FRAME = 2.2;
 
-      // fondo
+      // Fondo
       const bg = document.createElementNS(NS, 'rect');
       bg.setAttribute('x', '0'); bg.setAttribute('y', '0');
       bg.setAttribute('width', String(size));
@@ -122,8 +160,8 @@
       bg.setAttribute('fill', '#fff');
       svg.appendChild(bg);
 
-      // líneas internas
-      for (let i = 1; i <= 8; i++){
+      // Líneas internas
+      for (let i = 1; i <= 8; i++) {
         const x = i * step, y = i * step;
         const sw = (i % 3 === 0) ? THICK : THIN;
 
@@ -146,7 +184,7 @@
         svg.appendChild(h);
       }
 
-      // marco exterior
+      // Marco exterior
       const off = FRAME / 2;
       const frame = document.createElementNS(NS, 'rect');
       frame.setAttribute('x', String(off));
@@ -160,9 +198,9 @@
       frame.setAttribute('stroke-linecap', 'square');
       svg.appendChild(frame);
 
-      // números (80% de la celda)
+      // Números (80% de la celda, centrados)
       const fontSize = step * 0.80;
-      for (let i = 0; i < 81; i++){
+      for (let i = 0; i < 81; i++) {
         const val = grid[i];
         if (!val) continue;
         const r = (i / 9) | 0;
@@ -187,31 +225,41 @@
       return wrap;
     }
 
+    // Tarjeta de pantalla (con solución opcional)
     function createScreenCard(item, idx) {
       const card = document.createElement('div');
-      card.className = 'card';
+      card.className = 'card sudoku-card';
 
-      const holes = item.puzzle.reduce((s,v)=>s+(v===0),0);
-      const h = document.createElement('h3');
-      h.innerHTML = `<span>Sudoku</span><small>#${String(idx+1).padStart(2,'0')} • Huecos: ${holes}</small>`;
-      card.appendChild(h);
+      const header = document.createElement('div');
+      header.className = 'card-header d-flex justify-content-between align-items-center';
+      const title = document.createElement('span');
+      title.textContent = 'Sudoku';
+      const meta = document.createElement('small');
+      const holes = item.puzzle.reduce((s, v) => s + (v === 0), 0);
+      meta.textContent = `#${String(idx + 1).padStart(2, '0')} • Huecos: ${holes}`;
+      header.appendChild(title);
+      header.appendChild(meta);
+      card.appendChild(header);
 
-      card.appendChild(renderBoard(item.puzzle, { withBlanks: true }));
+      const body = document.createElement('div');
+      body.className = 'card-body';
+      body.appendChild(renderBoard(item.puzzle, { withBlanks: true }));
 
       const lbl = document.createElement('div');
       lbl.className = 'solution-label';
       lbl.textContent = 'Solución';
-      card.appendChild(lbl);
+      body.appendChild(lbl);
 
       const solWrap = document.createElement('div');
       solWrap.className = 'solution' + (showSolutions ? '' : ' hidden');
       solWrap.appendChild(renderBoard(item.solution, { withBlanks: false }));
-      card.appendChild(solWrap);
+      body.appendChild(solWrap);
 
+      card.appendChild(body);
       return card;
     }
 
-    // IMPRESIÓN: usa SVG
+    // Tarjeta de impresión (SVG)
     function createPrintCard(title, grid) {
       const card = document.createElement('div');
       card.className = 'print-card';
@@ -227,19 +275,24 @@
 
     function resetResults() {
       results.length = 0;
+      if (gridEl) gridEl.innerHTML = '';
       problemsGrid.innerHTML = '';
       solutionsGrid.innerHTML = '';
+      setPrintEnabled(false);
     }
 
     // ---------- UI States ----------
-    function startUI(total){
+    function startUI(total) {
       running = true;
       resetResults();
 
-      if (els.generateBtn) { els.generateBtn.textContent = 'Cancelar'; els.generateBtn.dataset.mode = 'cancel'; }
-      if (els.printBtn) els.printBtn.disabled = true;
+      // botón Generar en modo carga + otros estados
+      setGenerating(true, 'Generando…');
+      if (els.generateBtn) els.generateBtn.dataset.mode = 'cancel';
+      setPrintEnabled(false);
       if (els.toggleSolutionsBtn) els.toggleSolutionsBtn.disabled = true;
 
+      // preparar grilla de pantalla y estado
       els.output.innerHTML = '';
       gridEl = document.createElement('div');
       gridEl.className = 'puzzle-grid';
@@ -247,18 +300,38 @@
       setStatus(`Generando 0/${total}…`);
     }
 
-    function stopUI(){
+    function stopUI() {
       running = false;
-      if (els.generateBtn) { els.generateBtn.textContent = 'Generar'; els.generateBtn.dataset.mode = 'generate'; }
-      if (els.printBtn) els.printBtn.disabled = false;
+
+      // volver botón Generar a normal (asegurando spans)
+      setGenerating(false);
+      if (els.generateBtn) {
+        // si el contenido fue reemplazado por otro código, reinyectar spans
+        if (!els.generateBtn.querySelector('.label')) {
+          const lab = document.createElement('span'); lab.className = 'label'; lab.textContent = 'Generar';
+          els.generateBtn.appendChild(lab);
+        }
+        if (!els.generateBtn.querySelector('.spinner-border')) {
+          const sp = document.createElement('span'); sp.className = 'spinner-border spinner-border-sm d-none';
+          sp.setAttribute('role', 'status'); sp.setAttribute('aria-hidden', 'true');
+          els.generateBtn.appendChild(sp);
+        }
+        els.generateBtn.dataset.mode = 'generate';
+      }
+
+      // habilitar impresión si hay resultados
+      setPrintEnabled(results.length > 0);
       if (els.toggleSolutionsBtn) els.toggleSolutionsBtn.disabled = false;
     }
 
     // ---------- Worker ----------
-    function createWorker(){
-      if (worker) { try { worker.terminate(); } catch {} worker = null; }
+    function createWorker() {
+      if (worker) {
+        try { worker.terminate(); } catch {}
+        worker = null;
+      }
       try {
-        worker = new Worker(WORKER_URL, { type:'classic' });
+        worker = new Worker(WORKER_URL, { type: 'classic' });
       } catch (e) {
         console.error('[Worker] No pude crear el worker:', e);
         setStatus('Error creando worker (ver consola).');
@@ -266,9 +339,9 @@
         return null;
       }
 
-      worker.onmessage = (e)=>{
+      worker.onmessage = (e) => {
         const m = e.data || {};
-        if (m.type === 'progress'){
+        if (m.type === 'progress') {
           const item = { puzzle: m.puzzle, solution: m.solution, index: m.index };
           results.push(item);
 
@@ -276,33 +349,41 @@
           gridEl.appendChild(createScreenCard(item, m.index));
 
           // impresión (problemas)
-          const holes = item.puzzle.reduce((s,v)=>s+(v===0),0);
-          const title = `#${String(m.index+1).padStart(2,'0')} • Huecos: ${holes}`;
+          const holes = item.puzzle.reduce((s, v) => s + (v === 0), 0);
+          const title = `#${String(m.index + 1).padStart(2, '0')} • Huecos: ${holes}`;
           problemsGrid.appendChild(createPrintCard(title, item.puzzle));
 
           // impresión (soluciones)
-          const titleSol = `#${String(m.index+1).padStart(2,'0')}`;
+          const titleSol = `#${String(m.index + 1).padStart(2, '0')}`;
           solutionsGrid.appendChild(createPrintCard(titleSol, item.solution));
 
+          // progreso y permitir imprimir
           const total = parseCount();
-          setStatus(`Generando ${Math.min(m.index+1, total)}/${total}…`);
-        } else if (m.type === 'done'){
-          setStatus('Listo.');
+          setStatus(`Generando ${Math.min(m.index + 1, total)}/${total}…`);
+          setPrintEnabled(true);
+        } else if (m.type === 'done') {
+          setStatus('¡Listo! Sudokus generados.');
           stopUI();
-        } else if (m.type === 'cancelled'){
+        } else if (m.type === 'cancelled') {
           setStatus(`Cancelado tras ${m.generated}.`);
           stopUI();
-        } else if (m.type === 'error'){
+        } else if (m.type === 'error') {
           console.error('[Worker error msg]:', m.message, m.detail);
-          setStatus('Error (ver consola).');
+          setStatus('Ocurrió un error al generar. Intentá de nuevo.');
           stopUI();
         }
       };
-      worker.onerror = (err)=>{ console.error('[Worker onerror]:', err); setStatus('Error del worker'); stopUI(); };
+
+      worker.onerror = (err) => {
+        console.error('[Worker onerror]:', err);
+        setStatus('Error del worker (ver consola).');
+        stopUI();
+      };
+
       return worker;
     }
 
-    function startGeneration(ev){
+    function startGeneration(ev) {
       if (ev) { ev.preventDefault(); ev.stopPropagation(); }
       if (running) return;
 
@@ -322,26 +403,33 @@
 
     // ---------- Eventos ----------
     if (els.generateBtn) els.generateBtn.dataset.mode = 'generate';
-    if (els.generateBtn) els.generateBtn.addEventListener('click', (ev)=>{
+    if (els.generateBtn) els.generateBtn.addEventListener('click', (ev) => {
       ev.preventDefault(); ev.stopPropagation();
-      if (els.generateBtn.dataset.mode === 'cancel' && worker){ worker.postMessage({ type:'cancel' }); return; }
+      // Alterna entre generar y cancelar
+      if (els.generateBtn.dataset.mode === 'cancel' && worker) {
+        try { worker.postMessage({ type: 'cancel' }); } catch {}
+        return;
+      }
       startGeneration(ev);
     });
 
-    if (els.printBtn) els.printBtn.addEventListener('click', (ev)=>{ ev.preventDefault(); ev.stopPropagation(); window.print(); });
+    if (els.printBtn) els.printBtn.addEventListener('click', (ev) => {
+      ev.preventDefault(); ev.stopPropagation();
+      window.print();
+    });
 
-    if (els.toggleSolutionsBtn) els.toggleSolutionsBtn.addEventListener('click', (ev)=>{
+    if (els.toggleSolutionsBtn) els.toggleSolutionsBtn.addEventListener('click', (ev) => {
       ev.preventDefault(); ev.stopPropagation();
       showSolutions = !showSolutions;
       els.toggleSolutionsBtn.textContent = showSolutions ? 'Ocultar soluciones' : 'Mostrar soluciones';
       document.querySelectorAll('.solution').forEach(el => el.classList.toggle('hidden', !showSolutions));
     });
 
-    // Atajos
-    window.addEventListener('keydown', (ev)=>{
-      if (ev.key==='g'||ev.key==='G'){ ev.preventDefault(); els.generateBtn && els.generateBtn.click(); }
-      else if (ev.key==='p'||ev.key==='P'){ ev.preventDefault(); els.printBtn && els.printBtn.click(); }
-      else if (ev.key==='s'||ev.key==='S'){ ev.preventDefault(); els.toggleSolutionsBtn && els.toggleSolutionsBtn.click(); }
+    // Atajos de teclado
+    window.addEventListener('keydown', (ev) => {
+      if (ev.key === 'g' || ev.key === 'G') { ev.preventDefault(); els.generateBtn && els.generateBtn.click(); }
+      else if (ev.key === 'p' || ev.key === 'P') { ev.preventDefault(); els.printBtn && els.printBtn.click(); }
+      else if (ev.key === 's' || ev.key === 'S') { ev.preventDefault(); els.toggleSolutionsBtn && els.toggleSolutionsBtn.click(); }
     });
   });
 })();
