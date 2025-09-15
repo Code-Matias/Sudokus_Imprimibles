@@ -1,11 +1,12 @@
 // js/sudoku-ui.js
 // UI de la app: genera sudokus, muestra resultados en pantalla y arma secciones de impresión.
 // - Botón "Generar" con spinner y estados claros.
+// - Validación de "Cantidad" (1–100) con feedback amable.
 // - Impresión: tableros en SVG (líneas perfectas) dentro de .print-only.
 // - Sin dependencias externas. Worker clásico: js/generator-worker.js
 
 (function () {
-  const WORKER_VER = 'v10'; // asegurate de versionarlo cuando cambies el worker
+  const WORKER_VER = 'v10'; // versiona cuando cambies el worker
   let WORKER_URL;
 
   function safeWorkerURL() {
@@ -52,7 +53,7 @@
     let gridEl = null;
     const results = []; // {puzzle, solution, index}
 
-    // ---------- Secciones de impresión (siempre en el DOM, ocultas en pantalla por CSS) ----------
+    // ---------- Secciones de impresión (ocultas en pantalla por CSS) ----------
     const printProblemsSection = document.createElement('section');
     printProblemsSection.className = 'print-only print-section print-problems';
     const problemsHeading = document.createElement('h2');
@@ -81,9 +82,14 @@
       if (els.status) els.status.textContent = t || '';
     }
 
+    // Validación amable de Cantidad (1–100)
     function parseCount() {
       const n = +(els.count && els.count.value);
-      return Number.isFinite(n) && n > 0 ? Math.min(n, 100) : 1;
+      if (!Number.isFinite(n) || n < 1 || n > 100) {
+        setStatus('Elegí una cantidad entre 1 y 100.');
+        return 0;
+      }
+      return Math.min(n, 100);
     }
 
     // Botón Generar: asegurar spans (label + spinner) para togglear estado
@@ -306,7 +312,6 @@
       // volver botón Generar a normal (asegurando spans)
       setGenerating(false);
       if (els.generateBtn) {
-        // si el contenido fue reemplazado por otro código, reinyectar spans
         if (!els.generateBtn.querySelector('.label')) {
           const lab = document.createElement('span'); lab.className = 'label'; lab.textContent = 'Generar';
           els.generateBtn.appendChild(lab);
@@ -358,8 +363,8 @@
           solutionsGrid.appendChild(createPrintCard(titleSol, item.solution));
 
           // progreso y permitir imprimir
-          const total = parseCount();
-          setStatus(`Generando ${Math.min(m.index + 1, total)}/${total}…`);
+          const total = parseCount() || 0; // si usuario cambió el campo en medio, no romper
+          setStatus(`Generando ${Math.min(m.index + 1, total || (m.index + 1))}/${total || '…'}…`);
           setPrintEnabled(true);
         } else if (m.type === 'done') {
           setStatus('¡Listo! Sudokus generados.');
@@ -388,6 +393,8 @@
       if (running) return;
 
       const total = parseCount();
+      if (!total) { return; } // no arranca si la cantidad es inválida
+
       startUI(total);
 
       const w = createWorker();
