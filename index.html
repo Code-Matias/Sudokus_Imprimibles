@@ -1,63 +1,104 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Generador de Sudokus Imprimibles</title>
-<link rel="stylesheet" href="css/styles.css" />
-<link rel="stylesheet" href="css/print.css" media="print" />
-<noscript><style>body{font-family:system-ui,Arial} .nojs{padding:1rem;margin:1rem;border:1px solid #c00;background:#fee;color:#900}</style></noscript>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Generador de Sudokus Imprimibles</title>
+
+  <!-- Bootstrap Darkly local -->
+  <link rel="stylesheet" href="css/bootswatch-darkly.min.css">
+  <!-- Estilos propios -->
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/print.css" media="print">
+
+  <!-- Seguridad: Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; img-src 'self' data:;
+                 style-src 'self' 'unsafe-inline';
+                 font-src 'self' data:;
+                 script-src 'self';
+                 worker-src 'self';
+                 object-src 'none';
+                 base-uri 'self';
+                 frame-ancestors 'none';
+                 upgrade-insecure-requests">
 </head>
 <body>
-<header class="app-header" role="banner">
-<h1>Generador de Sudokus Imprimibles</h1>
-<p class="subtitle">Sudokus únicos con solución • Listos para imprimir</p>
-</header>
 
+  <!-- Encabezado -->
+  <header class="py-3 border-bottom">
+    <div class="container">
+      <h1 class="fw-bold mb-0">Generador de Sudokus Imprimibles</h1>
+      <p class="text-secondary mb-0">Sudokus únicos con solución • Listos para imprimir</p>
+    </div>
+  </header>
 
-<main class="container" role="main">
-<section class="controls" aria-label="Controles de generación">
-<div class="control-group">
-<label for="difficulty">Dificultad</label>
-<select id="difficulty" aria-label="Seleccionar dificultad">
-<option value="easy">Fácil</option>
-<option value="medium" selected>Media</option>
-<option value="hard">Difícil</option>
-</select>
-</div>
-<div class="control-group">
-<label for="count">Cantidad</label>
-<input id="count" type="number" min="1" max="100" step="1" value="2" aria-label="Cantidad de sudokus a generar" />
-</div>
-<div class="control-group">
-<label for="seed">Seed (opcional)</label>
-<input id="seed" type="text" placeholder="aleatoria" aria-label="Semilla opcional para reproducibilidad" />
-</div>
-<div class="buttons">
-<button id="generateBtn" class="btn primary" title="Atajo: g">Generar</button>
-<button id="toggleSolutionsBtn" class="btn" title="Atajo: s">Mostrar soluciones</button>
-<button id="printBtn" class="btn" title="Atajo: p">Imprimir</button>
-</div>
-<p class="hint">Atajos: <kbd>g</kbd> generar • <kbd>p</kbd> imprimir • <kbd>s</kbd> ver/ocultar soluciones</p>
-</section>
+  <!-- Contenido principal -->
+  <main class="container my-4">
 
+    <!-- Panel de controles -->
+    <section class="controls card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="row g-3 align-items-end">
+          <!-- Dificultad -->
+          <div class="col-12 col-md-4">
+            <label for="difficulty" class="form-label">Dificultad</label>
+            <select id="difficulty" class="form-select">
+              <option value="easy">Fácil</option>
+              <option value="medium" selected>Media</option>
+              <option value="hard">Difícil</option>
+            </select>
+          </div>
 
-<section id="status" class="status" aria-live="polite"></section>
-<section id="output" class="output" aria-live="polite"></section>
+          <!-- Cantidad -->
+          <div class="col-6 col-md-3">
+            <label for="count" class="form-label">Cantidad</label>
+            <input id="count" type="number" class="form-control" min="1" max="100" step="1" value="1">
+          </div>
 
+          <!-- Seed -->
+          <div class="col-12 col-md-5">
+            <label for="seed" class="form-label">Seed (opcional)</label>
+            <input id="seed" type="text" class="form-control" placeholder="aleatoria">
+          </div>
 
-<noscript>
-<div class="nojs">Necesitas JavaScript habilitado para generar los sudokus.</div>
-</noscript>
-</main>
+          <!-- Botones -->
+          <div class="col-12 d-flex flex-wrap gap-2 pt-2">
+            <button id="generateBtn" class="btn btn-primary fw-semibold" type="button">
+              Generar
+            </button>
+            <button id="toggleSolutionsBtn" class="btn btn-outline-light" type="button">
+              Mostrar soluciones
+            </button>
+            <button id="printBtn" class="btn btn-outline-info" type="button">
+              Imprimir
+            </button>
+            <div class="ms-auto small text-secondary">
+              Atajos: <kbd>g</kbd> generar • <kbd>p</kbd> imprimir • <kbd>s</kbd> soluciones
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
+    <!-- Estado -->
+    <section id="status" class="mb-3 small text-secondary"></section>
 
-<footer class="app-footer" role="contentinfo">
-<small>100% estático • GitHub Pages listo • © Tu marca</small>
-</footer>
+    <!-- Resultados -->
+    <section id="output"></section>
+  </main>
 
+  <!-- Pie -->
+  <footer class="py-4 border-top">
+    <div class="container small text-center text-secondary">
+      Proyecto abierto • GitHub Pages • © Tu ONG / Equipo
+    </div>
+  </footer>
 
-<!-- Sólo UI; la lógica pesada corre en el worker -->
-<script src="js/sudoku-ui.js"></script>
+  <!-- Scripts -->
+  <script src="js/rng.js"></script>
+  <script src="js/sudoku-core.js"></script>
+  <script src="js/generator-worker.js"></script>
+  <script src="js/sudoku-ui.js"></script>
 </body>
 </html>

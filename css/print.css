@@ -94,3 +94,8 @@
   .print-grid{ grid-template-columns: repeat(2, 1fr); gap: 10mm; }
 }
 */
+@media print {
+  .print-only { 
+    display: block !important; 
+  }
+}
