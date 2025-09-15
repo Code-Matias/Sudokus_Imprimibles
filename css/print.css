@@ -1,17 +1,18 @@
-/* print.css — Edición "periódico" (monocromo, sobrio, legible) — FIX */
+/* print.css — Impresión con tableros SVG (líneas perfectas) */
 @media print {
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
-  /* ===== Variables de impresión ===== */
-  /* Cambia --board-size a 90mm si quieres 2 por fila */
-  .print-only { --board-size: 62mm; } /* 62mm => 3 por fila, 90mm => 2 por fila */
+  /* ===== Ajuste de tamaño =====
+     - XL (1 por fila): 140–160mm
+     - Grande (2 por fila): 100–110mm (ver variante comentada al final) */
+  .print-only { --board-size: 140mm; }
 
   html, body{
     background:#fff !important;
     color:#000 !important;
     font-family: "Georgia", "Times New Roman", Times, serif;
-    font-size: 10.5pt;
-    line-height: 1.35;
+    font-size: 11pt;
+    line-height: 1.4;
   }
 
   /* Ocultar UI de pantalla */
@@ -29,8 +30,8 @@
     text-transform: uppercase;
     letter-spacing: .08em;
     font-weight: 700;
-    font-size: 16pt;
-    margin: 0 0 6mm 0;
+    font-size: 18pt;
+    margin: 0 0 8mm 0;
     padding: 2mm 0 3mm;
     border-top: 1pt solid #111;
     border-bottom: 1pt solid #111;
@@ -38,93 +39,58 @@
 
   .print-section{
     page-break-after: always;
-    padding: 10mm 8mm 10mm;
+    padding: 8mm 10mm 10mm;
   }
   .print-section:last-of-type{ page-break-after: auto; }
 
-  /* Rejilla: por defecto 3 por fila; cambia a repeat(2,1fr) si subes --board-size a 90mm */
+  /* Rejilla: 1 por fila (XL) */
   .print-grid{
     display:grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8mm 8mm;
+    grid-template-columns: 1fr;
+    gap: 12mm 0;
   }
 
   .print-card{ break-inside: avoid; }
 
-  /* Rótulo pequeño */
+  /* Rótulo tarjeta */
   .print-card-title{
-    font-size: 9pt;
+    font-size: 11pt;
     font-variant-caps: small-caps;
     letter-spacing: .03em;
-    margin: 0 0 1.5mm .5mm;
+    margin: 0 0 3mm .5mm;
     color: #111;
   }
 
-  /* ===== Tablero sólo dentro de .print-only ===== */
+  /* ===== Tablero ===== */
+  /* Reset de .board para impresión: evita herencias de pantalla (grid/bordes) */
   .print-only .board{
     width: var(--board-size);
-    aspect-ratio: 1 / 1;               /* cuadrado exacto */
+    height: var(--board-size);
     margin: 0 auto;
-    background: #fff;
-    display: grid;
-    grid-template-columns: repeat(9, 1fr);
-    grid-template-rows: repeat(9, 1fr); /* 9 filas iguales */
 
-    /* Marco exterior único */
-    outline: 1pt solid #333;
-    outline-offset: 0;
-
-    /* Recorta desbordes por redondeo */
+    display: block !important;     /* NO grid, es un wrapper del SVG */
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    box-sizing: border-box;
     overflow: hidden;
-    box-sizing: border-box;
   }
 
-  .print-only .cell{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font: 12pt/1 "Georgia", "Times New Roman", Times, serif;
-    color:#000;
-    border: none;
-    box-sizing: border-box;
+  /* El SVG ocupa el 100% del cuadro */
+  .print-only .board.board-svg svg{
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
   }
 
-  /* Líneas finas (sólo abajo y derecha) */
-  .print-only .cell{
-    border-right: 0.35pt solid #888;
-    border-bottom: 0.35pt solid #888;
-  }
-
-  /* Última columna y última fila sin bordes finos extra */
-  .print-only .cell:nth-child(9n){ border-right: none; }
-  .print-only .cell:nth-child(n+73){ border-bottom: none; }
-
-  /* Líneas gruesas de bloques 3x3 (verticales) */
-  .print-only .cell:nth-child(3n){
-    border-right: 1pt solid #333;
-  }
-  .print-only .cell:nth-child(9n){
-    border-right: none; /* última columna limpia (el marco lo pone el outline) */
-  }
-
-  /* Líneas gruesas de bloques 3x3 (horizontales) */
-  .print-only .cell:nth-child(n+19):nth-child(-n+27),
-  .print-only .cell:nth-child(n+46):nth-child(-n+54),
-  .print-only .cell:nth-child(n+73):nth-child(-n+81){
-    border-bottom: 1pt solid #333;
-  }
-
-  /* Huecos vacíos */
-  .print-only .cell.blank{ color: transparent; }
-
-  /* Margen mínimo bajo cada tablero */
-  .print-card .board{ margin-bottom: 1mm; }
+  /* Separación bajo cada tablero */
+  .print-card .board{ margin-bottom: 3mm; }
 }
 
-/* ===== Variante 2 por fila (opcional) =====
-   Activa descomentando este bloque:
+/* ===== Variante 2 por fila (grande) — descomenta para usarla =====
 @media print {
-  .print-only { --board-size: 90mm; }
-  .print-grid{ grid-template-columns: repeat(2, 1fr); }
+  .print-only { --board-size: 105mm; }
+  .print-grid{ grid-template-columns: repeat(2, 1fr); gap: 10mm; }
 }
 */

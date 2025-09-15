@@ -5,7 +5,7 @@
 // Requiere que el worker esté accesible en js/generator-worker.js
 
 (function () {
-  const WORKER_VER = 'v10'; // Asegúrate que coincida con el VER del worker
+  const WORKER_VER = 'v10'; // Debe coincidir con generator-worker.js
   let WORKER_URL;
 
   function safeWorkerURL() {
@@ -27,7 +27,7 @@
   ready(() => {
     WORKER_URL = safeWorkerURL();
 
-    // ---------- Captura de elementos ----------
+    // ---------- DOM ----------
     const els = {
       output: document.getElementById('output'),
       status: document.getElementById('status'),
@@ -37,7 +37,6 @@
       generateBtn: document.getElementById('generateBtn'),
       printBtn: document.getElementById('printBtn'),
       toggleSolutionsBtn: document.getElementById('toggleSolutionsBtn'),
-      toolbar: document.querySelector('.controls') || document.querySelector('form') || document.querySelector('header'),
       main: document.querySelector('main') || document.body
     };
 
@@ -52,17 +51,15 @@
     let gridEl = null;
     const results = []; // {puzzle, solution, index}
 
-    // ---------- Secciones “sólo impresión” (se crean aquí y se mantienen ocultas en pantalla) ----------
+    // ---------- Secciones solo impresión ----------
     const printProblemsSection = document.createElement('section');
     printProblemsSection.className = 'print-only print-section print-problems';
-
     const problemsHeading = document.createElement('h2');
     problemsHeading.className = 'print-title';
     problemsHeading.textContent = 'Sudokus (para resolver)';
-    printProblemsSection.appendChild(problemsHeading);
-
     const problemsGrid = document.createElement('div');
     problemsGrid.className = 'print-grid';
+    printProblemsSection.appendChild(problemsHeading);
     printProblemsSection.appendChild(problemsGrid);
 
     const printSolutionsSection = document.createElement('section');
@@ -70,12 +67,11 @@
     const solutionsHeading = document.createElement('h2');
     solutionsHeading.className = 'print-title';
     solutionsHeading.textContent = 'Soluciones';
-    printSolutionsSection.appendChild(solutionsHeading);
     const solutionsGrid = document.createElement('div');
     solutionsGrid.className = 'print-grid';
+    printSolutionsSection.appendChild(solutionsHeading);
     printSolutionsSection.appendChild(solutionsGrid);
 
-    // Insertar al final del <main> si existe, sino al final del body
     (els.main || document.body).appendChild(printProblemsSection);
     (els.main || document.body).appendChild(printSolutionsSection);
 
@@ -86,6 +82,7 @@
       return Number.isFinite(n) && n > 0 ? Math.min(n, 100) : 1;
     }
 
+    // Tablero HTML (pantalla)
     function renderBoard(grid, { withBlanks = true } = {}) {
       const board = document.createElement('div');
       board.className = 'board';
@@ -99,6 +96,97 @@
       return board;
     }
 
+    // Tablero SVG (impresión): líneas perfectas y escalado 100%
+    function renderBoardSVG(grid){
+      const size = 270;              // unidades internas; se escala con CSS
+      const step = size / 9;
+      const NS = 'http://www.w3.org/2000/svg';
+
+      const svg = document.createElementNS(NS, 'svg');
+      svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
+      svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+      svg.style.width = '100%';
+      svg.style.height = '100%';
+      svg.setAttribute('aria-hidden', 'true');
+
+      // grosores
+      const THIN = 0.8;
+      const THICK = 1.6;
+      const FRAME = 2.2;
+
+      // fondo
+      const bg = document.createElementNS(NS, 'rect');
+      bg.setAttribute('x', '0'); bg.setAttribute('y', '0');
+      bg.setAttribute('width', String(size));
+      bg.setAttribute('height', String(size));
+      bg.setAttribute('fill', '#fff');
+      svg.appendChild(bg);
+
+      // líneas internas
+      for (let i = 1; i <= 8; i++){
+        const x = i * step, y = i * step;
+        const sw = (i % 3 === 0) ? THICK : THIN;
+
+        const v = document.createElementNS(NS, 'line');
+        v.setAttribute('x1', x); v.setAttribute('y1', 0);
+        v.setAttribute('x2', x); v.setAttribute('y2', size);
+        v.setAttribute('stroke', '#888');
+        v.setAttribute('stroke-width', sw);
+        v.setAttribute('shape-rendering', 'crispEdges');
+        v.setAttribute('stroke-linecap', 'square');
+        svg.appendChild(v);
+
+        const h = document.createElementNS(NS, 'line');
+        h.setAttribute('x1', 0); h.setAttribute('y1', y);
+        h.setAttribute('x2', size); h.setAttribute('y2', y);
+        h.setAttribute('stroke', '#888');
+        h.setAttribute('stroke-width', sw);
+        h.setAttribute('shape-rendering', 'crispEdges');
+        h.setAttribute('stroke-linecap', 'square');
+        svg.appendChild(h);
+      }
+
+      // marco exterior
+      const off = FRAME / 2;
+      const frame = document.createElementNS(NS, 'rect');
+      frame.setAttribute('x', String(off));
+      frame.setAttribute('y', String(off));
+      frame.setAttribute('width', String(size - FRAME));
+      frame.setAttribute('height', String(size - FRAME));
+      frame.setAttribute('fill', 'none');
+      frame.setAttribute('stroke', '#333');
+      frame.setAttribute('stroke-width', FRAME);
+      frame.setAttribute('shape-rendering', 'crispEdges');
+      frame.setAttribute('stroke-linecap', 'square');
+      svg.appendChild(frame);
+
+      // números (80% de la celda)
+      const fontSize = step * 0.80;
+      for (let i = 0; i < 81; i++){
+        const val = grid[i];
+        if (!val) continue;
+        const r = (i / 9) | 0;
+        const c = i % 9;
+        const cx = c * step + step / 2;
+        const cy = r * step + step / 2;
+
+        const t = document.createElementNS(NS, 'text');
+        t.setAttribute('x', cx);
+        t.setAttribute('y', cy);
+        t.setAttribute('font-family', 'Georgia, "Times New Roman", Times, serif');
+        t.setAttribute('font-size', String(fontSize));
+        t.setAttribute('text-anchor', 'middle');
+        t.setAttribute('dominant-baseline', 'middle');
+        t.textContent = String(val);
+        svg.appendChild(t);
+      }
+
+      const wrap = document.createElement('div');
+      wrap.className = 'board board-svg';
+      wrap.appendChild(svg);
+      return wrap;
+    }
+
     function createScreenCard(item, idx) {
       const card = document.createElement('div');
       card.className = 'card';
@@ -108,7 +196,6 @@
       h.innerHTML = `<span>Sudoku</span><small>#${String(idx+1).padStart(2,'0')} • Huecos: ${holes}</small>`;
       card.appendChild(h);
 
-      // tablero (con huecos)
       card.appendChild(renderBoard(item.puzzle, { withBlanks: true }));
 
       const lbl = document.createElement('div');
@@ -124,8 +211,8 @@
       return card;
     }
 
+    // IMPRESIÓN: usa SVG
     function createPrintCard(title, grid) {
-      // Tarjeta minimalista para impresión (usa clases distintas)
       const card = document.createElement('div');
       card.className = 'print-card';
 
@@ -134,7 +221,7 @@
       h.textContent = title;
       card.appendChild(h);
 
-      card.appendChild(renderBoard(grid, { withBlanks: grid.some(v => v===0) }));
+      card.appendChild(renderBoardSVG(grid));
       return card;
     }
 
