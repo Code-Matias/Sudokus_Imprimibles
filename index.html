@@ -11,8 +11,11 @@
 
   <!-- Estilos propios -->
   <link rel="stylesheet" href="css/styles.css">
+  <!-- Estilos del botón de tema (nuevo) -->
+  <link rel="stylesheet" href="css/theme-toggle.css">
   <link rel="stylesheet" href="css/print.css" media="print">
 
+  <!-- PWA -->
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#0d6efd">
 
@@ -43,9 +46,14 @@
         <h1 class="fw-bold mb-0">Generador de Sudokus Imprimibles</h1>
         <p class="text-secondary mb-0">Sudokus únicos con solución • Listos para imprimir</p>
       </div>
-      <button id="themeToggle" class="btn btn-outline-secondary ms-3" type="button"
-              aria-pressed="false" aria-label="Cambiar tema claro/oscuro">
-        Claro / Oscuro
+
+      <!-- Botón de tema (ICONO) -->
+      <button id="themeToggle"
+              class="btn btn-outline-secondary ms-3 theme-btn fs-4"
+              type="button"
+              aria-pressed="false"
+              aria-label="Cambiar tema: claro u oscuro">
+        <span class="icon" aria-hidden="true">🌙</span>
       </button>
     </div>
   </header>
@@ -117,7 +125,7 @@
   <script src="js/rng.js"></script>
   <script src="js/sudoku-core.js"></script>
   <script src="js/sudoku-ui.js"></script>
-  <script src="js/theme.js"></script> 
+  <script src="js/theme.js"></script>
   <script src="js/sw-register.js"></script>
 
 </body>

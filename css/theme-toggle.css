@@ -1,0 +1,42 @@
+/* Botón de tema: redondo, táctil, con fondo invertido según el tema */
+.theme-btn{
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  transition: transform .05s ease, background .2s ease, border-color .2s ease, color .2s ease;
+  font-size: 1.4rem; /* tamaño del emoji */
+  /* ---- MODO CLARO por defecto (fondo oscuro, icono claro) ---- */
+  background: #0f172a;          /* gris muy oscuro */
+  color: #ffffff;
+  border: 1px solid #0f172a;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
+}
+
+.theme-btn .icon{
+  display: inline-block;
+  transform: translateY(-1px); /* ajuste óptico */
+}
+
+.theme-btn:hover{ filter: brightness(1.05); }
+.theme-btn:active{ transform: translateY(1px); }
+
+/* Foco visible (además del de Bootstrap) */
+.theme-btn:focus-visible{
+  outline: 3px solid rgba(13,110,253,.35);
+  outline-offset: 2px;
+}
+
+/* ---- MODO OSCURO (fondo claro, icono oscuro) ----
+   La clase .dark se setea en <html> desde theme.js */
+html.dark .theme-btn{
+  background: #f8fafc;          /* casi blanco */
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+}
