@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Generador de Sudokus Imprimibles</title>
 
-  <!-- Bootstrap Darkly local -->
-  <link rel="stylesheet" href="css/bootswatch-darkly.min.css">
+  <!-- Temas Bootswatch locales -->
+  <link id="theme-light" rel="stylesheet" href="css/bootswatch-flatly.min.css">
+  <link id="theme-dark"  rel="stylesheet" href="css/bootswatch-darkly.min.css" disabled>
+
   <!-- Estilos propios -->
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/print.css" media="print">
 
-  <!-- Seguridad: Content Security Policy -->
+  <!-- Seguridad: Content Security Policy (todo local/offline) -->
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; img-src 'self' data:;
                  style-src 'self' 'unsafe-inline';
@@ -25,11 +27,23 @@
 </head>
 <body>
 
-  <!-- Encabezado -->
+  <noscript>
+    <div style="background:#ffebee;color:#b71c1c;padding:12px;text-align:center">
+      Necesitás habilitar JavaScript para generar los sudokus.
+    </div>
+  </noscript>
+
+  <!-- Encabezado con switch de tema -->
   <header class="py-3 border-bottom">
-    <div class="container">
-      <h1 class="fw-bold mb-0">Generador de Sudokus Imprimibles</h1>
-      <p class="text-secondary mb-0">Sudokus únicos con solución • Listos para imprimir</p>
+    <div class="container d-flex align-items-center">
+      <div class="me-auto">
+        <h1 class="fw-bold mb-0">Generador de Sudokus Imprimibles</h1>
+        <p class="text-secondary mb-0">Sudokus únicos con solución • Listos para imprimir</p>
+      </div>
+      <button id="themeToggle" class="btn btn-outline-secondary ms-3" type="button"
+              aria-pressed="false" aria-label="Cambiar tema claro/oscuro">
+        Claro / Oscuro
+      </button>
     </div>
   </header>
 
@@ -53,7 +67,7 @@
           <!-- Cantidad -->
           <div class="col-6 col-md-3">
             <label for="count" class="form-label">Cantidad</label>
-            <input id="count" type="number" class="form-control" min="1" max="100" step="1" value="1">
+            <input id="count" type="number" class="form-control" min="1" max="100" step="1" value="12">
           </div>
 
           <!-- Seed -->
@@ -67,7 +81,7 @@
             <button id="generateBtn" class="btn btn-primary fw-semibold" type="button">
               Generar
             </button>
-            <button id="toggleSolutionsBtn" class="btn btn-outline-light" type="button">
+            <button id="toggleSolutionsBtn" class="btn btn-outline-secondary" type="button">
               Mostrar soluciones
             </button>
             <button id="printBtn" class="btn btn-outline-info" type="button">
@@ -84,21 +98,22 @@
     <!-- Estado -->
     <section id="status" class="mb-3 small text-secondary"></section>
 
-    <!-- Resultados -->
+    <!-- Resultados (pantalla) -->
     <section id="output"></section>
   </main>
 
   <!-- Pie -->
   <footer class="py-4 border-top">
     <div class="container small text-center text-secondary">
-      Proyecto abierto • GitHub Pages • © Tu ONG / Equipo
+      Proyecto abierto • Funciona offline • © Tu ONG / Equipo
     </div>
   </footer>
 
-  <!-- Scripts -->
+  <!-- Scripts (todo local) -->
   <script src="js/rng.js"></script>
   <script src="js/sudoku-core.js"></script>
-  <script src="js/generator-worker.js"></script>
   <script src="js/sudoku-ui.js"></script>
+  <script src="js/theme.js"></script> <!-- ⬅️ nuevo, externo -->
+
 </body>
 </html>

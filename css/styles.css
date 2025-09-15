@@ -102,3 +102,11 @@ footer {
 .print-only { 
   display: none !important; 
 }
+
+/*modo claro y oscuro */
+:root{
+  --cell-border: #cbd5e1;   /* gris suave Flatly */
+  --board-border: #1f2937;  /* gris oscuro */
+}
+.board{ border-color: var(--board-border); }
+.cell{  border-color: var(--cell-border); }
