@@ -3,45 +3,37 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0d6efd" />
 
+  <!-- ✅ ÚNICA CSP (sin dominios externos de fuentes) -->
   <meta http-equiv="Content-Security-Policy" content="
-  default-src 'self';
-  img-src 'self' data:;
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-  font-src 'self' data: https://fonts.gstatic.com;
-  script-src 'self';
-  connect-src 'self';
-">
+    default-src 'self';
+    img-src 'self' data:;
+    style-src 'self' 'unsafe-inline';
+    font-src 'self' data:;
+    script-src 'self' 'unsafe-inline';
+    worker-src 'self';
+    connect-src 'self';
+    object-src 'none';
+    base-uri 'self';
+  ">
+
   <title>Generador de Sudokus Imprimibles</title>
 
-  <!-- Temas Bootswatch locales -->
-  <link id="theme-light" rel="stylesheet" href="css/bootswatch-flatly.min.css">
-  <link id="theme-dark"  rel="stylesheet" href="css/bootswatch-darkly.min.css" disabled>
+  <!-- ✅ Temas Bootswatch locales (archivos ya LIMPIOS sin @import a Google Fonts) -->
+ <!-- <link id="theme-light" rel="stylesheet" href="css/bootswatch-flatly.min.css"> -->
+<link id="theme-dark"  rel="stylesheet" href="css/bootswatch-darkly.min.css">
 
-  <!-- Estilos propios -->
+
+
+
+  <!-- ✅ Estilos propios (con @font-face a /fonts/Lato-*.woff2) -->
   <link rel="stylesheet" href="css/styles.css">
-  <!-- Estilos del botón de tema -->
   <link rel="stylesheet" href="css/theme-toggle.css">
   <link rel="stylesheet" href="css/print.css" media="print">
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#0d6efd">
-
-  <!-- Seguridad: Content Security Policy (todo local/offline) -->
-  <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; img-src 'self' data:;
-                 style-src 'self' 'unsafe-inline';
-                 font-src 'self' data:;
-                 script-src 'self';
-                 worker-src 'self';
-                 object-src 'none';
-                 base-uri 'self';
-                 frame-ancestors 'none';
-                 upgrade-insecure-requests">
 </head>
 <body>
 
@@ -59,7 +51,6 @@
         <p class="text-secondary mb-0">Sudokus únicos con solución • Listos para imprimir</p>
       </div>
 
-      <!-- Botón de tema (ICONO). Quitamos clases .btn de Bootstrap para que mande nuestro estilo -->
       <button id="themeToggle"
               class="theme-btn ms-3 fs-4"
               type="button"
@@ -94,7 +85,7 @@
             <input id="count" type="number" class="form-control" min="1" max="100" step="1" value="1">
           </div>
 
-          <!-- Seed -->
+          <!-- Opciones avanzadas -->
           <details id="advOpts" class="adv">
             <summary>Opciones avanzadas</summary>
             <div class="adv-body">
@@ -130,7 +121,7 @@
     <!-- Estado -->
     <section id="status" role="status" aria-live="polite" class="mb-3 small text-secondary"></section>
 
-    <!-- Resultados (pantalla) -->
+    <!-- Resultados -->
     <section id="output"></section>
   </main>
 
@@ -139,11 +130,10 @@
     <div class="container small text-center text-secondary">
       Proyecto abierto • Funciona offline • © Tu ONG / Equipo
       <span id="appVersion"></span> • <span id="buildDate"></span> • <span id="pwaStatus"></span>
-
     </div>
   </footer>
 
-  <!-- Scripts (todo local) -->
+  <!-- Scripts (todos locales) -->
   <script src="js/rng.js"></script>
   <script src="js/sudoku-core.js"></script>
   <script src="js/sudoku-ui.js"></script>

@@ -122,3 +122,33 @@ footer {
 }
 .adv[open] > summary { background: var(--btn-bg, #f8f9fa); }
 .adv-body { display: flex; gap: .75rem; align-items: center; margin-top: .5rem; }
+
+/* ---------- Fuente local Lato ---------- */
+@font-face {
+  font-family: "Lato";
+  src: url("../fonts/Lato-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Lato";
+  src: url("../fonts/Lato-Italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Lato";
+  src: url("../fonts/Lato-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Aplicar Lato a todo el sitio */
+body {
+  font-family: "Lato", system-ui, sans-serif;
+}
