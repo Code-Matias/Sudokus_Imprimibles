@@ -25,6 +25,38 @@
     }
   }
 
+  // ------------ URL compartible (difficulty, count, seed) ------------
+  function readParams() {
+    const q = new URLSearchParams(location.search);
+    const diff  = q.get('difficulty');
+    const count = q.get('count');
+    const seed  = q.get('seed');
+
+    const d = document.getElementById('difficulty');
+    const c = document.getElementById('count');
+    const s = document.getElementById('seed');
+
+    if (diff && d)  d.value = diff;
+    if (count && c) c.value = count;
+    if (seed && s)  s.value = seed;
+  }
+
+  function writeParams() {
+    const q = new URLSearchParams(location.search);
+    const d = document.getElementById('difficulty');
+    const c = document.getElementById('count');
+    const s = document.getElementById('seed');
+
+    if (d) q.set('difficulty', d.value);
+    if (c) q.set('count', c.value);
+    if (s) {
+      const v = (s.value || '').trim();
+      if (v) q.set('seed', v); else q.delete('seed');
+    }
+    try { history.replaceState(null, '', `${location.pathname}?${q.toString()}`); } catch {}
+  }
+  // -------------------------------------------------------------------
+
   ready(() => {
     WORKER_URL = safeWorkerURL();
 
@@ -38,8 +70,27 @@
       generateBtn: document.getElementById('generateBtn'),
       printBtn: document.getElementById('printBtn'),
       toggleSolutionsBtn: document.getElementById('toggleSolutionsBtn'),
-      main: document.querySelector('main') || document.body
+      main: document.querySelector('main') || document.body,
+
+      // Opciones avanzadas
+      advDetails: document.getElementById('advOpts'),
+      copyBtn: document.getElementById('copyLink'),
+      copyMsg: document.getElementById('copyMsg'),
     };
+
+    // Si no existe #output en el HTML, lo creo para evitar errores
+    if (!els.output) {
+      els.output = document.createElement('div');
+      els.output.id = 'output';
+      (els.main || document.body).appendChild(els.output);
+    }
+
+    // Inicializar valores desde la URL y persistir cambios en la URL
+    readParams();
+    ['difficulty','count','seed'].forEach(id => {
+      const el = document.getElementById(id);
+      el && el.addEventListener('change', writeParams);
+    });
 
     // Asegurar type="button"
     ['generateBtn', 'printBtn', 'toggleSolutionsBtn'].forEach(k => {
@@ -395,6 +446,9 @@
       const total = parseCount();
       if (!total) { return; } // no arranca si la cantidad es inválida
 
+      // Persistir en URL (NO autogeneramos seed)
+      writeParams();
+
       startUI(total);
 
       const w = createWorker();
@@ -404,7 +458,7 @@
         type: 'start',
         difficulty: (els.difficulty && els.difficulty.value) || 'medium',
         count: total,
-        seed: (els.seed && els.seed.value || '').trim(),
+        seed: (els.seed && els.seed.value || '').trim(), // puede ir vacío
       });
     }
 
@@ -438,5 +492,24 @@
       else if (ev.key === 'p' || ev.key === 'P') { ev.preventDefault(); els.printBtn && els.printBtn.click(); }
       else if (ev.key === 's' || ev.key === 'S') { ev.preventDefault(); els.toggleSolutionsBtn && els.toggleSolutionsBtn.click(); }
     });
+
+    // -------- Opciones avanzadas: copiar enlace del set --------
+    if (els.copyBtn) {
+      els.copyBtn.addEventListener('click', async () => {
+        writeParams(); // asegura que la URL tenga los valores actuales
+        try {
+          await navigator.clipboard.writeText(location.href);
+          if (els.copyMsg) els.copyMsg.textContent = 'Enlace copiado.';
+          setTimeout(() => { if (els.copyMsg) els.copyMsg.textContent = ''; }, 2000);
+        } catch {
+          if (els.copyMsg) els.copyMsg.textContent = 'No se pudo copiar, copiá manualmente.';
+        }
+      });
+    }
+    // Si ya hay seed en el campo/URL, abrir las opciones avanzadas
+    if (els.advDetails && els.seed && (els.seed.value || '').trim()) {
+      els.advDetails.open = true;
+    }
+    // ------------------------------------------------------------
   });
 })();

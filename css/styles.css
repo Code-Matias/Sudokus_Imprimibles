@@ -110,3 +110,22 @@ footer {
 }
 .board{ border-color: var(--board-border); }
 .cell{  border-color: var(--cell-border); }
+/* Opciones avanzadas */
+.adv { margin-left: 0.5rem; }
+.adv > summary {
+  cursor: pointer;
+  user-select: none;
+  padding: .25rem .4rem;
+  border-radius: .35rem;
+  border: 1px solid var(--border, #e5e7eb);
+  display: inline-block;
+}
+.adv[open] > summary {
+  background: var(--btn-bg, #f8f9fa);
+}
+.adv-body {
+  display: flex;
+  gap: .75rem;
+  align-items: center;
+  margin-top: .5rem;
+}

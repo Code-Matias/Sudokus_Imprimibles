@@ -83,10 +83,17 @@
           </div>
 
           <!-- Seed -->
-          <div class="col-12 col-md-5">
-            <label for="seed" class="form-label">Seed (opcional)</label>
-            <input id="seed" type="text" class="form-control" placeholder="aleatoria">
+          <details id="advOpts" class="adv">
+          <summary>Opciones avanzadas</summary>
+          <div class="adv-body">
+            <label>Seed (opcional):
+              <input id="seed" type="text" placeholder="(opcional)" />
+            </label>
+
+            <button id="copyLink" class="btn btn-sm" type="button">Copiar enlace del set</button>
+            <span id="copyMsg" class="small text-secondary" aria-live="polite"></span>
           </div>
+        </details>
 
           <!-- Botones -->
           <div class="col-12 d-flex flex-wrap gap-2 pt-2">
