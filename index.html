@@ -84,16 +84,16 @@
 
           <!-- Seed -->
           <details id="advOpts" class="adv">
-          <summary>Opciones avanzadas</summary>
-          <div class="adv-body">
-            <label>Seed (opcional):
-              <input id="seed" type="text" placeholder="(opcional)" />
-            </label>
+            <summary>Opciones avanzadas</summary>
+            <div class="adv-body">
+              <label>Seed (opcional):
+                <input id="seed" type="text" placeholder="(opcional)" />
+              </label>
 
-            <button id="copyLink" class="btn btn-sm" type="button">Copiar enlace del set</button>
-            <span id="copyMsg" class="small text-secondary" aria-live="polite"></span>
-          </div>
-        </details>
+              <button id="copyLink" class="btn btn-sm" type="button">Copiar enlace del set</button>
+              <span id="copyMsg" class="small text-secondary" aria-live="polite"></span>
+            </div>
+          </details>
 
           <!-- Botones -->
           <div class="col-12 d-flex flex-wrap gap-2 pt-2">
@@ -126,6 +126,8 @@
   <footer class="py-4 border-top">
     <div class="container small text-center text-secondary">
       Proyecto abierto • Funciona offline • © Tu ONG / Equipo
+      <span id="appVersion"></span> • <span id="buildDate"></span> • <span id="pwaStatus"></span>
+
     </div>
   </footer>
 
@@ -135,6 +137,7 @@
   <script src="js/sudoku-ui.js"></script>
   <script src="js/theme.js"></script>
   <script src="js/sw-register.js"></script>
+    <script src="js/footer-meta.js"></script>
 
 </body>
 </html>
