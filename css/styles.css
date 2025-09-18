@@ -152,3 +152,6 @@ footer {
 body {
   font-family: "Lato", system-ui, sans-serif;
 }
+
+:root { --app-font: 'Lato', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+body { font-family: var(--app-font); }
